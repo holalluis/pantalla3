@@ -5,30 +5,45 @@
 		*{margin:0}
 		body{font-family:Arial}
 		.inline{display:inline-block;vertical-align:top}
+
+		/*Animació blinking*/
+		@keyframes blink{from{background-color:white}to{background-color:#abc}}
+		.blinking{animation:blink 3s ease 0s infinite alternate}
+
 		h1{
-			padding:0.1em;
+			padding:0.3em 0.1em;
 			background:#abc;
 		}
 		form{display:inline;}
 		#left,#right{ 
 			border:1px solid #ccc; 
-			overflow-y:auto;
-			text-align:left;
-			padding:0.3em;
+			border-top:none;
+			border-left:none;
 			margin-right:-5px;
+			overflow-y:auto;
+			padding:0.3em;
+			text-align:left;
 		}
-		#left  {width:20%}
-		#right {width:75%}
+		#right {width:80%}
+		#left  {width:18%}
+		#left > span {font-size:13px;background:#ddd;padding:0.1em 0.5em;border-radius:0.3em}
+		#left {
+			max-height:730px;
+			overflow-y:scroll;
+		}
 		table {display:inline-block;vertical-align:top}
 		table {border-collapse:collapse}
 		td,th {border:1px solid #ccc;font-weight:normal}
-		table input {width:100px}
+		table input {width:85px}
 	</style>
 
 	<!--scripts necessaris per tarifa 3.1-->
 	<script src="https://cdn.rawgit.com/holalluis/tarifes/master/bin/tarifa3.js"></script>
 	<script src="https://cdn.rawgit.com/holalluis/tarifes/master/bin/classes.js"></script>
 	<script src="https://cdn.rawgit.com/holalluis/tarifes/master/bin/funcions.js"></script>
+
+	<script>
+	</script>
 
 	<?php
 		/**
@@ -44,11 +59,7 @@
 		else
 			$inici=date("Y")."-01-01 00:00";
 
-		$corba=[
-			10,
-			20,
-			30
-		]; //kW
+		$corba=[]; //kW
 
 		//sobreescriu els valors si l'usuari les ha proporcionat
 		$corba = isset($_POST['corba']) ? $_POST['corba'] : $corba ; //corba càrrega
@@ -67,34 +78,46 @@
 </head><body onload=init()>
 
 <!--títol-->
-<h1 onclick=window.location="index.php" style="cursor:pointer;border-bottom:1px solid #ccc">
+<h1 onclick=window.location="index.php" style="cursor:pointer">
 	<script>document.write(document.title)</script>
 	<!--mostra mes i any de la factura-->
 	<span>(<?php echo date("M/Y",strtotime($inici))?>)</span>
 </h1><center>
 
 <!--menu el titol-->
-<div style="padding:0.5em;">
+<div id=triaMes style="padding:0.5em;">
+	<style>
+		#triaMes {
+			padding:1em;
+			position:absolute;
+			top:10px;
+			right:5px;
+		}
+		#triaMes input, #triaMes select, #triaMes button {
+			font-size:12px;
+			vertical-align:top;
+			width:60px;
+		}
+	</style>
 
 	<!--tria mes i any-->
 	<form method=POST>
 		Mes:
 		<select name=mes>
-			<option value="01">Gener
-			<option value="02">Febrer
-			<option value="03">Març
-			<option value="04">Abril
-			<option value="05">Maig
-			<option value="06">Juny
-			<option value="07">Juliol
-			<option value="08">Agost
-			<option value="09">Setembre
-			<option value="10">Octubre
-			<option value="11">Novembre
-			<option value="12">Desembre
+			<option value="01">Gen
+			<option value="02">Feb
+			<option value="03">Mar
+			<option value="04">Abr
+			<option value="05">Mai
+			<option value="06">Jun
+			<option value="07">Jul
+			<option value="08">Ago
+			<option value="09">Set
+			<option value="10">Oct
+			<option value="11">Nov
+			<option value="12">Des
 		</select>
-		<input name=any type=number value="<?php if(isset($_POST['any'])){echo $_POST['any'];}else{echo date("Y");}?>" 
-			style=width:55px>
+		<input name=any type=number value="<?php if(isset($_POST['any'])){echo $_POST['any'];}else{echo date("Y");}?>">
 		<button>ok</button>
 		<script>
 			var select = document.querySelector("form select[name=mes]")
@@ -111,17 +134,13 @@
 
 	<!--left-->
 	<div id=left class=inline>
-		<div><b>Corba càrrega:</b></div>
+		<div><b>Corba horària de càrrega:</b></div>
 		<span id=count_i>...</span> instants,
 		<span id=count_d>...</span> dades
 		<ul id=instants>...</ul>
 		<style>
+			#instants {list-style-type:none}
 			#instants li {font-size:11px}
-			#left > span {font-size:13px;background:#ddd;padding:0.1em 0.5em;border-radius:0.3em}
-			#left {
-				max-height:650px;
-				overflow-y:scroll;
-			}
 		</style>
 	</div>
 
@@ -163,27 +182,25 @@
 		<!--nova lectura-->
 		<div id=nova >
 			<style>
-				#nova #lectura {width:50px}
 				#nova {
 					background:#ddd;
 					padding:2em 1em;
 					border-radius:0.5em;
 					font-size:20px;
 				}
-				#btn_afegir {
+				#readCorba {
 					height:47px;
 					vertical-align:top;
-					margin-left:-6px;
+					margin-left:-7px;
 					padding-left:1em;
 					padding-right:1em;
 					font-size:22px;
+					border-radius:0;
 				}
 			</style>
-			Nova dada de potència (kW):
-			<input id=lectura value=50 type=number style="font-size:20px;padding:0.5em">
-			<button onclick="afegeixP(document.querySelector('#nova #lectura').value)"
-				id=btn_afegir
-			>ok</button>
+			
+			<!--corba.txt-->
+			<button id=readCorba onclick=readCorba()>Rellegir corba.txt</button>
 		</div>
 	</div>
 
@@ -262,13 +279,13 @@
 				var instant = new Date(inici);
 				instant.setHours(inici.getHours()+i);
 				if(instant.getUTCMonth()>inici.getUTCMonth()) break;
-				if(energy[i]===undefined)energy[i]=0;
+				if(energy[i]===undefined || energy[i]=="")energy[i]=0;
 				var color=energy[i]==0?"#bbb":""
 				var li=document.createElement('li')
 				ul.appendChild(li)
 				li.style.color=color
 				li.innerHTML="<span class=data>"+instant.toISOString().replace("T"," ").substr(0,16)+"</span>"
-				li.innerHTML+=": "+energy[i]+" kW"
+				li.innerHTML+=": <span class=ener>"+energy[i]+"</span> kW"
 				i++;
 			}
 
@@ -298,40 +315,47 @@
 		hlAra()
 	}
 
-	//busca el primer zero i substitueix-lo pel valor especificat
-	function afegeixP(potencia)
+	//busca l'index de la última dada diferent de zero
+	function buscaU()
 	{
-		potencia=parseFloat(potencia)
-		for(var i=0;i<energy.length;i++)
+		var ener=document.querySelectorAll('#main #left #instants span.ener')
+		for(var i=0;i<ener.length;i++)
 		{
-			if(energy[i]==0)
-			{
-				energy[i]=potencia;
-				init()
-				return;break;
-			}
-		}
-		alert("Error! Dades potència ple")
-	}
-
-	function buscaD()
-	{
-		var ara = new Date()
-		var dates = document.querySelectorAll('#main #left #instants span.data')
-		for(var i=0;i<dates.length;i++)
-		{
-			var data = new Date(dates[i].textContent)
-			if(data>ara)
-				return i
+			var pot=parseFloat(ener[i].textContent)
+			if(pot==0 || pot=="")
+				return (i-1)
 		}
 		return false
 	}
-
+	//ressalta en color verd la última dada disponible
 	function hlAra()
 	{
-		var i=buscaD()
+		var i=buscaU()
 		if(!i)return
 		var dates = document.querySelectorAll('#main #left #instants span.data')
-		dates[i].parentNode.style.backgroundColor="green"
+		try{
+			dates[i].parentNode.classList.add("blinking")
+		}catch(e){}
 	}
+
+	//llegeix l'arxiu "corba.txt"
+	function readCorba()
+	{
+		var rawFile = new XMLHttpRequest();
+		rawFile.open("GET","corba.txt",true);
+		rawFile.onreadystatechange=function()
+		{
+			if(rawFile.readyState==4)
+			{
+				if(rawFile.status==200||rawFile.status==0)
+				{
+					var allText = rawFile.responseText;
+					energy = allText.split("\n");
+					init()
+				}
+			}
+		}
+		rawFile.send();
+	}
+	readCorba() //s'executa un cop però no a init!
 </script>
