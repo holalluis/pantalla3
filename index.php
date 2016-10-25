@@ -1,6 +1,6 @@
 <!doctype html><html><head>
 	<meta charset=utf-8>
-	<title>TARIFA 3.x &mdash; Factura a temps real</title>
+	<title>Factura elèctrica a temps real &#128268;</title>
 	<style>
 		*{margin:0}
 		body{font-family:Arial}
@@ -10,35 +10,42 @@
 		@keyframes blink{from{background-color:white}to{background-color:#abc}}
 		.blinking{animation:blink 3s ease 0s infinite alternate}
 
+		/*Animació cost total*/
+		@keyframes total{from{background-color:#af0}to{background-color:white}}
+		#total{animation:total 5s ease infinite alternate}
+
 		h1{
-			padding:0.3em 0.1em;
+			padding:0.3em 0.3em;
 			background:#abc;
 		}
-		form{display:inline;}
 		#left,#right{ 
 			border:1px solid #ccc; 
 			border-top:none;
 			border-left:none;
 			margin-right:-5px;
 			overflow-y:auto;
-			padding:0.3em;
 			text-align:left;
+			padding:0.3em;
 		}
-		#right {border:none}
+		#right {
+			border:none;
+			padding:0.3em 0.5em;
+		}
 		#right {width:80%}
 		#left  {width:18%}
-		#left > span {font-size:13px;background:#ddd;padding:0.1em 0.5em;border-radius:0.3em}
 		#left {
 			max-height:730px;
 			overflow-y:scroll;
 		}
-		table {display:inline-block;vertical-align:top}
-		table {border-collapse:collapse}
-		td,th {border:1px solid #ccc;font-weight:normal}
+		#left > span {font-size:13px;background:#ddd;padding:0.1em 0.5em;border-radius:0.3em}
+		table {
+			border-collapse:collapse;
+			font-size:13px;
+		}
+		td,th{border:1px solid #ccc;font-weight:normal}
 		th{background:#aabbcc}
 		th{padding:0.3em 0.5em}
 		table input {width:85px}
-		table {font-size:13px}
 	</style>
 
 	<!--scripts necessaris per tarifa 3.1-->
@@ -85,7 +92,7 @@
 	<span>(<?php echo date("M/Y",strtotime($inici))?>)</span>
 </h1>
 
-<!--menu per triar mes-->
+<!--triar mes-->
 <div id=triaMes style="padding:0.5em;">
 	<style>
 		#triaMes {
@@ -149,7 +156,7 @@
 	<!--right: factura i opcions-->
 	<div id=right class=inline>
 		<table>
-			<tr><th colspan=2 style=text-align:center><b>Tarifa</b>
+			<tr><th colspan=2 style=text-align:center><b>Paràmetres tarifa 3.1</b>
 				<th>P1 punta
 				<th>P2 llano
 				<th>P3 valle
@@ -177,16 +184,20 @@
 
 		<div id=total>
 			<style>
-				#total {font-size:80px;padding:40px 20px}
+				#total {
+					font-size:90px;
+					padding:40px 20px;
+					margin:0.1em 0;
+					border-radius:0.1em;
+				}
 			</style>
-		TOTAL: <span id=cost>0</span> €
+		<span style=font-size:50px>Aquest mes:</span> <span id=cost>0</span> €
 		</div>
 
 		<!--nova lectura-->
 		<div id=nova>
 			<style>
 				#nova {
-					padding:1em;
 					font-size:20px;
 				}
 				#readCorba {
@@ -195,13 +206,14 @@
 				}
 			</style>
 			
-			<!--boto rellegir corba.txt-->
-			<button id=readCorba onclick=readCorba()>
-				Llegir corba horària ara
-			</button>
-
-			<!--ruta arxiu-->
-			Ruta arxiu: <a href="corba.txt" target=_blank><?php echo realpath("corba.txt")?></a>
+			<div>
+				<!--boto rellegir corba.txt-->
+				<button id=readCorba onclick=readCorba()>
+					Llegir corba horària ara
+				</button>
+				<!--ruta arxiu-->
+				Ruta arxiu: <a href="corba.txt" target=_blank><?php echo realpath("corba.txt")?></a>
+			</div>
 
 			<!--proxima lectura automàtica-->
 			<script>
@@ -240,14 +252,15 @@
 			<div id=LecturaAuto>
 				<style>
 					#LecturaAuto {
-						padding:1em 0;
 						background:black;
-						color:white;
 						border-radius:0.5em;
-						padding:1em;
-						margin:1em 0;
+						color:white;
+						margin:0.5em 0;
+						padding:1.5em 1em;
 					}
-					#falten {color:#af0}
+					#LecturaAuto button {font-size:18px}
+					#falten {color:#af0;display:inline-block;width:50px;text-align:right}
+
 				</style>
 				Lectura automàtica:
 				<span id=falten><script>document.write(LecturaAuto.segons)</script></span> segons
@@ -265,7 +278,7 @@
 					<li>Veure energia
 					<li>Gràfics
 					<li>Optimitzacions
-					<li>Oportunitats
+					<li>Veure màxim
 				</ul>
 			</div>
 		</div>
