@@ -2,4 +2,4 @@
 
 ## TO DO
 
-intentar eliminar php, fer només javascript
+poder programar lectures automàtiques
