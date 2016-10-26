@@ -1,6 +1,6 @@
 <!doctype html><html><head>
 	<meta charset=utf-8>
-	<title>Factura elèctrica a temps real &#128268;</title>
+	<title>Factura elèctrica a temps real</title>
 	<style>
 		*{margin:0}
 		body{font-family:Arial}
@@ -87,9 +87,9 @@
 
 <!--títol-->
 <h1 onclick=window.location="index.php" style="cursor:pointer">
-	<script>document.write(document.title)</script>
+	<script>document.write(document.title)</script> &mdash;
 	<!--mostra mes i any de la factura-->
-	<span>(<?php echo date("M/Y",strtotime($inici))?>)</span>
+	<span>(<?php echo date("M-Y",strtotime($inici))?>)</span>
 </h1>
 
 <!--triar mes-->
@@ -142,7 +142,7 @@
 
 	<!--left: corba horaria-->
 	<div id=left class=inline>
-		<div><b>Corba horària</b></div>
+		<div><b>Corba horària actual</b></div>
 		<span id=count_i>...</span> instants,
 		<span id=count_d>...</span> dades
 		<ul id=instants>...</ul>
@@ -155,6 +155,7 @@
 
 	<!--right: factura i opcions-->
 	<div id=right class=inline>
+		<!--parametres tarifa-->
 		<table>
 			<tr><th colspan=2 style=text-align:center><b>Paràmetres tarifa 3.1</b>
 				<th>P1 punta
@@ -182,6 +183,7 @@
 					<td><input id=tax_alq value=0       onchange="tax_alq=parseFloat(this.value);init()" type=number min=0>
 		</table>
 
+		<!--euros factura molt gran-->
 		<div id=total>
 			<style>
 				#total {
@@ -191,7 +193,8 @@
 					border-radius:0.1em;
 				}
 			</style>
-		<span style=font-size:50px>Aquest mes:</span> <span id=cost>0</span> €
+			<span style=font-size:50px>Aquest mes:</span> 
+			<span id=cost>0</span> €
 		</div>
 
 		<!--nova lectura-->
@@ -206,16 +209,14 @@
 				}
 			</style>
 			
+			<!--boto rellegir corba.txt-->
 			<div>
-				<!--boto rellegir corba.txt-->
-				<button id=readCorba onclick=readCorba()>
-					Llegir corba horària ara
-				</button>
+				<button id=readCorba onclick=readCorba()> Llegir corba horària ara </button>
 				<!--ruta arxiu-->
 				Ruta arxiu: <a href="corba.txt" target=_blank><?php echo realpath("corba.txt")?></a>
 			</div>
 
-			<!--proxima lectura automàtica-->
+			<!--programar lectura automàtica backend-->
 			<script>
 				var LecturaAuto = {
 					interval:null,
@@ -249,6 +250,7 @@
 				};
 			</script>
 
+			<!--view programar lectura automàtica-->
 			<div id=LecturaAuto>
 				<style>
 					#LecturaAuto {
@@ -260,7 +262,6 @@
 					}
 					#LecturaAuto button {font-size:18px}
 					#falten {color:#af0;display:inline-block;width:50px;text-align:right}
-
 				</style>
 				Lectura automàtica:
 				<span id=falten><script>document.write(LecturaAuto.segons)</script></span> segons
@@ -272,28 +273,35 @@
 				segons
 			</div>
 
-			<!--expansions-->
-			<hr><div style="margin:1em 0em">
-				Futur<ul>
-					<li>Veure energia
-					<li>Gràfics
-					<li>Optimitzacions
-					<li>Veure màxim
+			<!--futur llista-->
+			<div>
+				<hr style="margin:1em 0">
+				Per fer<ul>
+					<li>Veure factura desglossada
+					<li>Veure màxim per P1, P2 i P3
+					<li>Veure gràfic evolució factura
+					<li>Interfície/instruccions per executar optimitzacions
 				</ul>
 			</div>
 		</div>
 	</div>
-
 </div>
 
+<!--script principal del càlcul de factura-->
 <script>
-	//variables globals necessàries per calcular la Factura
+	/**
+		TARIFA 3
+		Són variables globals ja definides als scripts importats
+	**/
 	tarifa=3;
+	tipus=[];//distribució de P1 P2 P3 en les 24 hores
 	tipus.push(new Tipus(3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,2)); //tipus 0
 	tipus.push(new Tipus(3,3,3,3,3,3,3,3,2,2,1,1,1,1,1,1,2,2,2,2,2,2,2,2)); //tipus 1
 	tipus.push(new Tipus(3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2)); //tipus 2 (weekmod)
-	weekmod=2 //index del tipus que defineix els caps de setmana i festius
-	tint=1 //time interval: tenim una dada de potència (kW) cada hora
+	weekmod=2 //tipus dels caps de setmana i festius
+	tint=1 //time interval: una dada de potència cada hora
+
+	//dies festius (s'aplica tipus weekmod)
 	festius.push(new DiaFestiu(new Date(Date.UTC(2016,gen,01)),"Any Nou"              ))
 	festius.push(new DiaFestiu(new Date(Date.UTC(2016,mar,29)),"Divendres Sant"       ))
 	festius.push(new DiaFestiu(new Date(Date.UTC(2016,abr,01)),"Dilluns de Pasqua"    ))
@@ -308,8 +316,10 @@
 	festius.push(new DiaFestiu(new Date(Date.UTC(2016,des,25)),"Nadal"    ))
 	festius.push(new DiaFestiu(new Date(Date.UTC(2016,des,26)),"Sant Esteve"  ))
 
+	//canvis horaris
 	canvisHoraris.push(new CanviHorari(new Date(Date.UTC(2016,mar,27,02,00)),new Date(Date.UTC(2016,oct,30,02,00))))
 
+	//mes calculat
 	var d = {
 		any:"<?php echo substr($inici,0,4)?>",
 		mes:parseInt("<?php echo substr($inici,5,2)?>")-1,
@@ -331,19 +341,22 @@
 	potConP1 = parseFloat(document.querySelector('#potConP1').value)
 	potConP2 = parseFloat(document.querySelector('#potConP2').value)
 	potConP3 = parseFloat(document.querySelector('#potConP3').value)
+
 	//preus per kWh per cada període
 	eurKWhP1 = parseFloat(document.querySelector('#eurKWhP1').value)
 	eurKWhP2 = parseFloat(document.querySelector('#eurKWhP2').value)
 	eurKWhP3 = parseFloat(document.querySelector('#eurKWhP3').value)
+
 	//preus per kW per cada període
 	eurKWP1 = parseFloat(document.querySelector('#eurKWP1').value)
 	eurKWP2 = parseFloat(document.querySelector('#eurKWP2').value)
 	eurKWP3 = parseFloat(document.querySelector('#eurKWP3').value)
-	//Fi inputs
+	//fi inputs
 
-	//funció que es crida a body onload
+	//es crida a body onload
 	function init()
 	{
+		//omple la part esquerra de la pantalla amb les dades de potència
 		(function(){
 			var d = {
 				any:"<?php echo substr($inici,0,4)?>",
@@ -398,24 +411,24 @@
 		})()
 		var cost = calcula()[0]; //calcula la factura
 		document.querySelector('#total #cost').innerHTML=cost.toFixed(2)
-		hlAra()
+		hlAra() //ilumina la última dada de potència disponible al fitxer llegit
 	}
 
-	//busca l'index de la última dada diferent de zero
-	function buscaU()
-	{
-		var ener=document.querySelectorAll('#main #left #instants span.ener')
-		for(var i=0;i<ener.length;i++)
-		{
-			var pot=parseFloat(ener[i].textContent)
-			if(pot==0 || pot=="")
-				return (i-1)
-		}
-		return false
-	}
 	//ressalta en color verd la última dada disponible
 	function hlAra()
 	{
+		//busca l'index de la última dada diferent de zero
+		function buscaU()
+		{
+			var ener=document.querySelectorAll('#main #left #instants span.ener')
+			for(var i=0;i<ener.length;i++)
+			{
+				var pot=parseFloat(ener[i].textContent)
+				if(pot==0 || pot=="")
+					return (i-1)
+			}
+			return false
+		}
 		var i=buscaU()
 		if(!i)return
 		var dates = document.querySelectorAll('#main #left #instants span.data')
