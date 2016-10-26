@@ -7,8 +7,8 @@
 		.inline{display:inline-block;vertical-align:top}
 
 		/*Animació blinking*/
-		@keyframes blink{from{background-color:white}to{background-color:#abc}}
-		.blinking{animation:blink 3s ease 0s infinite alternate}
+		@keyframes blink{from{background-color:white}to{background-color:#af0}}
+		.blinking{animation:blink 5s ease infinite alternate}
 
 		/*Animació cost total*/
 		@keyframes total{from{background-color:#af0}to{background-color:white}}
@@ -49,9 +49,9 @@
 	</style>
 
 	<!--scripts necessaris per tarifa 3.1-->
-	<script src="https://cdn.rawgit.com/holalluis/tarifes/master/bin/tarifa3.js"></script>
-	<script src="https://cdn.rawgit.com/holalluis/tarifes/master/bin/classes.js"></script>
-	<script src="https://cdn.rawgit.com/holalluis/tarifes/master/bin/funcions.js"></script>
+	<script src="https://rawgit.com/holalluis/tarifes/master/bin/tarifa3.js"></script>
+	<script src="https://rawgit.com/holalluis/tarifes/master/bin/classes.js"></script>
+	<script src="https://rawgit.com/holalluis/tarifes/master/bin/funcions.js"></script>
 
 	<?php
 		/**
@@ -89,7 +89,7 @@
 <h1 onclick=window.location="index.php" style="cursor:pointer">
 	<script>document.write(document.title)</script> &mdash;
 	<!--mostra mes i any de la factura-->
-	<span>(<?php echo date("M-Y",strtotime($inici))?>)</span>
+	<span>(<?php echo date("M Y",strtotime($inici))?>)</span>
 </h1>
 
 <!--triar mes-->
@@ -142,14 +142,13 @@
 
 	<!--left: corba horaria-->
 	<div id=left class=inline>
-		<div><b>Corba horària actual</b></div>
+		<div><b>Corba horària actual</b> <button onclick="document.querySelector('.blinking').scrollIntoView()">Últim valor</button></div>
 		<span id=count_i>...</span> instants,
 		<span id=count_d>...</span> dades
 		<ul id=instants>...</ul>
 		<style>
 			#instants {list-style-type:none;padding-left:0.7em}
 			#instants li {font-size:11px;cursor:default}
-			#instants li:hover {background:yellow}
 		</style>
 	</div>
 
@@ -214,6 +213,8 @@
 				<button id=readCorba onclick=readCorba()> Llegir corba horària ara </button>
 				<!--ruta arxiu-->
 				Ruta arxiu: <a href="corba.txt" target=_blank><?php echo realpath("corba.txt")?></a>
+				<br>
+				<button onclick="energy=[];init()">Buidar corba</button>
 			</div>
 
 			<!--programar lectura automàtica backend-->
@@ -302,19 +303,19 @@
 	tint=1 //time interval: una dada de potència cada hora
 
 	//dies festius (s'aplica tipus weekmod)
-	festius.push(new DiaFestiu(new Date(Date.UTC(2016,gen,01)),"Any Nou"              ))
-	festius.push(new DiaFestiu(new Date(Date.UTC(2016,mar,29)),"Divendres Sant"       ))
-	festius.push(new DiaFestiu(new Date(Date.UTC(2016,abr,01)),"Dilluns de Pasqua"    ))
-	festius.push(new DiaFestiu(new Date(Date.UTC(2016,mai,01)),"Dia del Treball"      ))
-	festius.push(new DiaFestiu(new Date(Date.UTC(2016,jun,24)),"Sant Joan"            ))
-	festius.push(new DiaFestiu(new Date(Date.UTC(2016,jul,25)),"Sant Jaume (Girona)"  ))
-	festius.push(new DiaFestiu(new Date(Date.UTC(2016,set,11)),"Diada de Catalunya"   ))
-	festius.push(new DiaFestiu(new Date(Date.UTC(2016,oct,12)),"El Pilar"             ))
-	festius.push(new DiaFestiu(new Date(Date.UTC(2016,oct,29)),"Sant Narcís (Girona)" ))
-	festius.push(new DiaFestiu(new Date(Date.UTC(2016,nov,01)),"Tots Sants"           ))
+	festius.push(new DiaFestiu(new Date(Date.UTC(2016,gen,01)),"Any Nou"               ))
+	festius.push(new DiaFestiu(new Date(Date.UTC(2016,mar,29)),"Divendres Sant"        ))
+	festius.push(new DiaFestiu(new Date(Date.UTC(2016,abr,01)),"Dilluns de Pasqua"     ))
+	festius.push(new DiaFestiu(new Date(Date.UTC(2016,mai,01)),"Dia del Treball"       ))
+	festius.push(new DiaFestiu(new Date(Date.UTC(2016,jun,24)),"Sant Joan"             ))
+	festius.push(new DiaFestiu(new Date(Date.UTC(2016,jul,25)),"Sant Jaume (Girona)"   ))
+	festius.push(new DiaFestiu(new Date(Date.UTC(2016,set,11)),"Diada de Catalunya"    ))
+	festius.push(new DiaFestiu(new Date(Date.UTC(2016,oct,12)),"El Pilar"              ))
+	festius.push(new DiaFestiu(new Date(Date.UTC(2016,oct,29)),"Sant Narcís (Girona)"  ))
+	festius.push(new DiaFestiu(new Date(Date.UTC(2016,nov,01)),"Tots Sants"            ))
 	festius.push(new DiaFestiu(new Date(Date.UTC(2016,des,06)),"Dia de la Constitució" ))
-	festius.push(new DiaFestiu(new Date(Date.UTC(2016,des,25)),"Nadal"    ))
-	festius.push(new DiaFestiu(new Date(Date.UTC(2016,des,26)),"Sant Esteve"  ))
+	festius.push(new DiaFestiu(new Date(Date.UTC(2016,des,25)),"Nadal"                 ))
+	festius.push(new DiaFestiu(new Date(Date.UTC(2016,des,26)),"Sant Esteve"           ))
 
 	//canvis horaris
 	canvisHoraris.push(new CanviHorari(new Date(Date.UTC(2016,mar,27,02,00)),new Date(Date.UTC(2016,oct,30,02,00))))
@@ -370,32 +371,20 @@
 
 			var setmana = ["Dilluns","Dimarts","Dimecres","Dijous","Divendres","Dissabte","Diumenge"];
 
-			var i=0;
-			while(true)
+			var temps_blocs = generaBlocs();
+
+			for(var i=0;i<temps_blocs[0].length-1;i++)
 			{
-				var instant = new Date(inici);
-				instant.setHours(inici.getHours()+i);
-				if(instant.getUTCMonth()>inici.getUTCMonth()) break;
-				if(energy[i]===undefined || energy[i]=="")energy[i]=0;
+				if(energy[i]===undefined || energy[i]=="") energy[i]=0;
+
+				var instant = temps_blocs[0][i]
 				var color=energy[i]==0?"#bbb":""
 				var li=document.createElement('li')
-				var nomDia = setmana[instant.getDay()];
-				li.title=nomDia
 				ul.appendChild(li)
+				li.title=setmana[instant.getDay()];
 				li.style.color=color
 				li.innerHTML="<span class=data>"+instant.toISOString().replace("T"," ").substr(0,16)+"</span>"
 				li.innerHTML+=": <span class=ener>"+energy[i]+"</span> kW"
-				i++;
-			}
-
-			//solucio cutre per mesos on es canvia l'hora (març i octubre)
-			if(d.mes==2)
-			{
-				while(energy.length!=743) energy.pop()
-			}
-			else if(d.mes==9)
-			{
-				while(energy.length!=745) energy.push(0)
 			}
 
 			//compta el nombre de dades diferents de zero (dades reals potència)
@@ -449,7 +438,13 @@
 				if(rawFile.status==200||rawFile.status==0)
 				{
 					var allText = rawFile.responseText;
-					energy = allText.split("\n");
+					var linies = allText.split("\n");
+					//recorre les linies i agafa la última columna
+					for(var i=0;i<linies.length;i++)
+					{
+						var linia = linies[i].split(" ")
+						energy[i] = linia[linia.length-1]
+					}
 					init()
 				}
 			}
