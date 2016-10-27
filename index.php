@@ -398,7 +398,7 @@
 			document.querySelector("#main #left #count_i").innerHTML=energy.length
 			document.querySelector("#main #left #count_d").innerHTML=difZero
 		})()
-		var cost = calcula()[0]; //calcula la factura
+		var cost = calcula()[0].total; //calcula la factura
 		document.querySelector('#total #cost').innerHTML=cost.toFixed(2)
 		hlAra() //ilumina la última dada de potència disponible al fitxer llegit
 	}
