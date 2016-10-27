@@ -278,10 +278,10 @@
 			<div>
 				<hr style="margin:1em 0">
 				Per fer<ul>
-					<li>Veure factura desglossada
-					<li>Veure màxim per P1, P2 i P3
-					<li>Veure gràfic evolució factura
-					<li>Interfície/instruccions per executar optimitzacions
+					<li>Desglossar factura
+					<li>Màxim per P1, P2 i P3
+					<li>Veure algun gràfic evolució 
+					<li>Afegir interfície o instruccions per executar optimitzacions
 				</ul>
 			</div>
 		</div>
